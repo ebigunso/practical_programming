@@ -32,8 +32,8 @@ public enum LexicalType {
 	SUB,		// -
 	MUL,		// *
 	DIV,		// /
-	LP,			// )
-	RP,			// (
+	LP,			// (
+	RP,			// )
 	COMMA,		// ,
 	LOOP,		// LOOP
 	TO,			// TO
