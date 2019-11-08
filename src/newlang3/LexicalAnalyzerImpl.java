@@ -4,22 +4,13 @@ import java.io.*;
 import java.util.HashMap;
 
 public class LexicalAnalyzerImpl implements LexicalAnalyzer {
-	HashMap<String, LexicalType> reservedWords;
-	HashMap<String, LexicalType> definedSpecialChars;
+	static HashMap<String, LexicalType> reservedWords;
+	static HashMap<String, LexicalType> definedSpecialChars;
 	File file;
 	FileReader fileReader;
 	PushbackReader pushbackReader;
 
-	//Open file, and set reserved words and defined special characters
-	public LexicalAnalyzerImpl(String fname) {
-		try {
-			file = new File(fname);
-			fileReader = new FileReader(file);
-			pushbackReader = new PushbackReader(fileReader);
-		}catch(FileNotFoundException e) {
-			e.printStackTrace();
-		}
-
+	static {
 		reservedWords = new HashMap<String, LexicalType>();
 		definedSpecialChars = new HashMap<String, LexicalType>();
 		//Set reserved words
@@ -60,13 +51,28 @@ public class LexicalAnalyzerImpl implements LexicalAnalyzer {
 		definedSpecialChars.put("(", LexicalType.LP);
 		definedSpecialChars.put(")", LexicalType.RP);
 		definedSpecialChars.put(",", LexicalType.COMMA);
-		definedSpecialChars.put(String.valueOf((char)-1), LexicalType.EOF);
+		definedSpecialChars.put(String.valueOf((char)(-1)), LexicalType.EOF);
+	}
+
+	//Open file, and set reserved words and defined special characters
+	public LexicalAnalyzerImpl(String fname) {
+		try {
+			file = new File(fname);
+			fileReader = new FileReader(file);
+			pushbackReader = new PushbackReader(fileReader);
+		}catch(FileNotFoundException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public LexicalUnit get() throws Exception {
 		//Note: -1 is returned for EOF
-		String strReadchar = String.valueOf((char)pushbackReader.read());
+		int readchar = pushbackReader.read();
+		if(readchar == -1) {
+			return new LexicalUnit(LexicalType.EOF);
+		}
+		String strReadchar = String.valueOf((char)readchar);
 
 		//Skip if start of unit is a Space or a Tab. Those cases are invalid.
 		//Keep reading until a valid starting character is found
@@ -82,6 +88,8 @@ public class LexicalAnalyzerImpl implements LexicalAnalyzer {
 			return getStringUnit(strReadchar);
 		}else if(strReadchar.matches("\"")) {
 			return getLiteralUnit(strReadchar);
+		}else if(strReadchar.matches("\r|\n")) {
+			return getNewLineUnit(strReadchar);
 		}
 
 		return getSpecialUnit(strReadchar);
@@ -105,7 +113,7 @@ public class LexicalAnalyzerImpl implements LexicalAnalyzer {
 
 	private LexicalUnit getStringUnit(String inputchar) throws IOException {
 		if(!inputchar.matches("[a-z]|[A-Z]")) {
-			throw new IOException("Invalid character input for getStringUnit(String)");
+			throw new IOException("Invalid character input for getStringUnit(String): " + inputchar);
 		}
 		//Read until invalid character appears, then pushback one
 		String outputValue = "";
@@ -131,27 +139,68 @@ public class LexicalAnalyzerImpl implements LexicalAnalyzer {
 		return null;
 	}
 
-	private LexicalUnit getSpecialUnit(String inputchar) throws IOException {
-		//Read until invalid character appears, then pushback one
-		String outputValue = "";
+	private LexicalUnit getNewLineUnit(String inputchar) throws IOException {
+		//inputchar is either \r or \n
 		char pushbackTmp;
-		do {
-			outputValue += inputchar;
+
+		//Recognize "\r" and "\r\n" as LexicalType.NL
+		//Check if it's "\r\n" if not pushback one
+		if(inputchar.matches("\r")) {
 			pushbackTmp = (char)pushbackReader.read();
 			inputchar = String.valueOf(pushbackTmp);
-		}while(!inputchar.matches(" |\t|[0-9]|[a-z]|[A-Z]|\""));
-		pushbackReader.unread(pushbackTmp);
+			if(!inputchar.matches("\n")) {
+				pushbackReader.unread(pushbackTmp);
+			}
+			return new LexicalUnit(LexicalType.NL);
+		} else {
+			return new LexicalUnit(LexicalType.NL);
+		}
+	}
+
+	private LexicalUnit getSpecialUnit(String inputchar) throws IOException {
+		String outputValue = "";
+		char pushbackTmp;
+
+		//Read one, only three characters "=,<,>" has a valid second character
+		//If it's one of those, check if second character is a valid two character special code
+		//If not pushback one
+		outputValue += inputchar;
+		if(inputchar.matches("=|<|>")) {
+			String firstChar = inputchar;
+			pushbackTmp = (char)pushbackReader.read();
+			inputchar = String.valueOf(pushbackTmp);
+			switch(firstChar) {
+			case "=":
+				if(firstChar.matches("<|>")) {
+					outputValue += inputchar;
+				} else {
+					pushbackReader.unread(pushbackTmp);
+				}
+				break;
+			case "<":
+				if(firstChar.matches("=|>")) {
+					outputValue += inputchar;
+				} else {
+					pushbackReader.unread(pushbackTmp);
+				}
+				break;
+			case ">":
+				if(firstChar.matches("=")) {
+					outputValue += inputchar;
+				} else {
+					pushbackReader.unread(pushbackTmp);
+				}
+				break;
+			}
+		}
 
 		//If resulting String is a reserved word, generate LexicalUnit with that Type
 		//Else throw an IOException
-		if() {
-			//todo
-			return;
+		if(reservedWords.containsKey(outputValue)) {
+			return new LexicalUnit(reservedWords.get(outputValue));
 		}else {
-			//todo
+			throw new IOException("Invalid character input for getSpecialUnit(String): " + inputchar);
 		}
-		//todo
-		return null;
 	}
 
 }
