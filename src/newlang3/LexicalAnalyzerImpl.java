@@ -140,6 +140,9 @@ public class LexicalAnalyzerImpl implements LexicalAnalyzer {
 	}
 
 	private LexicalUnit getNewLineUnit(String inputchar) throws IOException {
+		if(!inputchar.matches("\r|\n")) {
+			throw new IOException("Invalid character input for getNewLineUnit(): " + inputchar);
+		}
 		//inputchar is either \r or \n
 		char pushbackTmp;
 
@@ -199,7 +202,7 @@ public class LexicalAnalyzerImpl implements LexicalAnalyzer {
 		if(reservedWords.containsKey(outputValue)) {
 			return new LexicalUnit(reservedWords.get(outputValue));
 		}else {
-			throw new IOException("Invalid character input for getSpecialUnit(String): " + inputchar);
+			throw new IOException("Invalid character input for getSpecialUnit(String): " + outputValue);
 		}
 	}
 
