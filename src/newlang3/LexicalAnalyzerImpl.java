@@ -5,14 +5,14 @@ import java.util.HashMap;
 
 public class LexicalAnalyzerImpl implements LexicalAnalyzer {
 	static HashMap<String, LexicalType> reservedWords;
-	static HashMap<String, LexicalType> definedSpecialChars;
+	static HashMap<String, LexicalType> reservedSpecialChars;
 	File file;
 	FileReader fileReader;
 	PushbackReader pushbackReader;
 
 	static {
 		reservedWords = new HashMap<String, LexicalType>();
-		definedSpecialChars = new HashMap<String, LexicalType>();
+		reservedSpecialChars = new HashMap<String, LexicalType>();
 		//Set reserved words
 		reservedWords.put("if", LexicalType.IF);
 		reservedWords.put("then", LexicalType.THEN);
@@ -33,25 +33,25 @@ public class LexicalAnalyzerImpl implements LexicalAnalyzer {
 		reservedWords.put("to", LexicalType.TO);
 		reservedWords.put("wend", LexicalType.WEND);
 
-		//Set defined special characters
-		definedSpecialChars.put("=", LexicalType.EQ);
-		definedSpecialChars.put("<", LexicalType.LT);
-		definedSpecialChars.put(">", LexicalType.GT);
-		definedSpecialChars.put("<=", LexicalType.LE);
-		definedSpecialChars.put("=<", LexicalType.LE);
-		definedSpecialChars.put(">=", LexicalType.GE);
-		definedSpecialChars.put("=>", LexicalType.GE);
-		definedSpecialChars.put("<>", LexicalType.NE);
-		definedSpecialChars.put("\n", LexicalType.NL); //When reading, fix all \r\n and \r to \n
-		definedSpecialChars.put(".", LexicalType.DOT);
-		definedSpecialChars.put("+", LexicalType.ADD);
-		definedSpecialChars.put("-", LexicalType.SUB);
-		definedSpecialChars.put("*", LexicalType.MUL);
-		definedSpecialChars.put("/", LexicalType.DIV);
-		definedSpecialChars.put("(", LexicalType.LP);
-		definedSpecialChars.put(")", LexicalType.RP);
-		definedSpecialChars.put(",", LexicalType.COMMA);
-		definedSpecialChars.put(String.valueOf((char)(-1)), LexicalType.EOF);
+		//Set reserved special characters
+		reservedSpecialChars.put("=", LexicalType.EQ);
+		reservedSpecialChars.put("<", LexicalType.LT);
+		reservedSpecialChars.put(">", LexicalType.GT);
+		reservedSpecialChars.put("<=", LexicalType.LE);
+		reservedSpecialChars.put("=<", LexicalType.LE);
+		reservedSpecialChars.put(">=", LexicalType.GE);
+		reservedSpecialChars.put("=>", LexicalType.GE);
+		reservedSpecialChars.put("<>", LexicalType.NE);
+		reservedSpecialChars.put("\n", LexicalType.NL); //When reading, fix all \r\n and \r to \n
+		reservedSpecialChars.put(".", LexicalType.DOT);
+		reservedSpecialChars.put("+", LexicalType.ADD);
+		reservedSpecialChars.put("-", LexicalType.SUB);
+		reservedSpecialChars.put("*", LexicalType.MUL);
+		reservedSpecialChars.put("/", LexicalType.DIV);
+		reservedSpecialChars.put("(", LexicalType.LP);
+		reservedSpecialChars.put(")", LexicalType.RP);
+		reservedSpecialChars.put(",", LexicalType.COMMA);
+		reservedSpecialChars.put(String.valueOf((char)(-1)), LexicalType.EOF);
 	}
 
 	//Open file, and set reserved words and defined special characters
@@ -164,31 +164,24 @@ public class LexicalAnalyzerImpl implements LexicalAnalyzer {
 		String outputValue = "";
 		char pushbackTmp;
 
-		//Read one, only three characters "=,<,>" has a valid second character
+		//Read one, only two characters "<,>" has a valid second character
 		//If it's one of those, check if second character is a valid two character special code
 		//If not pushback one
 		outputValue += inputchar;
-		if(inputchar.matches("=|<|>")) {
+		if(inputchar.matches("<|>")) {
 			String firstChar = inputchar;
 			pushbackTmp = (char)pushbackReader.read();
 			inputchar = String.valueOf(pushbackTmp);
 			switch(firstChar) {
-			case "=":
-				if(firstChar.matches("<|>")) {
-					outputValue += inputchar;
-				} else {
-					pushbackReader.unread(pushbackTmp);
-				}
-				break;
 			case "<":
-				if(firstChar.matches("=|>")) {
+				if(inputchar.matches("=|>")) {
 					outputValue += inputchar;
 				} else {
 					pushbackReader.unread(pushbackTmp);
 				}
 				break;
 			case ">":
-				if(firstChar.matches("=")) {
+				if(inputchar.matches("=")) {
 					outputValue += inputchar;
 				} else {
 					pushbackReader.unread(pushbackTmp);
@@ -199,8 +192,8 @@ public class LexicalAnalyzerImpl implements LexicalAnalyzer {
 
 		//If resulting String is a reserved word, generate LexicalUnit with that Type
 		//Else throw an IOException
-		if(reservedWords.containsKey(outputValue)) {
-			return new LexicalUnit(reservedWords.get(outputValue));
+		if(reservedSpecialChars.containsKey(outputValue)) {
+			return new LexicalUnit(reservedSpecialChars.get(outputValue));
 		}else {
 			throw new IOException("Invalid character input for getSpecialUnit(String): " + outputValue);
 		}
