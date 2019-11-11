@@ -2,10 +2,11 @@ package newlang3;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.Map;
 
 public class LexicalAnalyzerImpl implements LexicalAnalyzer {
-	static HashMap<String, LexicalType> reservedWords;
-	static HashMap<String, LexicalType> reservedSpecialChars;
+	static Map<String, LexicalType> reservedWords;
+	static Map<String, LexicalType> reservedSpecialChars;
 	File file;
 	FileReader fileReader;
 	PushbackReader pushbackReader;
@@ -38,9 +39,7 @@ public class LexicalAnalyzerImpl implements LexicalAnalyzer {
 		reservedSpecialChars.put("<", LexicalType.LT);
 		reservedSpecialChars.put(">", LexicalType.GT);
 		reservedSpecialChars.put("<=", LexicalType.LE);
-		reservedSpecialChars.put("=<", LexicalType.LE);
 		reservedSpecialChars.put(">=", LexicalType.GE);
-		reservedSpecialChars.put("=>", LexicalType.GE);
 		reservedSpecialChars.put("<>", LexicalType.NE);
 		reservedSpecialChars.put("\n", LexicalType.NL); //When reading, fix all \r\n and \r to \n
 		reservedSpecialChars.put(".", LexicalType.DOT);
@@ -107,6 +106,30 @@ public class LexicalAnalyzerImpl implements LexicalAnalyzer {
 	}
 
 	private LexicalUnit getIntUnit(String inputchar) throws IOException {
+		if(!inputchar.matches("[0-9]")) {
+			throw new IOException("Invalid character input for getIntUnit(String): " + inputchar);
+		}
+		//Read until invalid character appears
+		//Anything but a number or the first dot followed by a number is invalid
+		//When an invalid character appears, pushback one. If the previous character is a dot, pushback that also
+		boolean hasDot = false;
+		String outputValue = "";
+		char pushbackTmp;
+		do {
+			outputValue += inputchar;
+			pushbackTmp = (char)pushbackReader.read();
+			inputchar = String.valueOf(pushbackTmp);
+			if(inputchar.matches(".")) {
+				if(hasDot) {
+					break;
+				} else {
+					//todo
+					hasDot = true;
+				}
+			}
+		}while(inputchar.matches("[0-9]|."));
+		pushbackReader.unread(pushbackTmp);
+
 		//todo
 		return null;
 	}
@@ -122,7 +145,7 @@ public class LexicalAnalyzerImpl implements LexicalAnalyzer {
 			outputValue += inputchar;
 			pushbackTmp = (char)pushbackReader.read();
 			inputchar = String.valueOf(pushbackTmp);
-		}while(inputchar.matches("[0-9]|[a-z]|[A-Z]"));
+		}while(inputchar.matches("[0-9]|[a-z]|[A-Z]|_"));
 		pushbackReader.unread(pushbackTmp);
 
 		//If resulting String is a reserved word, generate LexicalUnit with that Type
@@ -135,8 +158,18 @@ public class LexicalAnalyzerImpl implements LexicalAnalyzer {
 	}
 
 	private LexicalUnit getLiteralUnit(String inputchar) throws IOException {
-		//todo;
-		return null;
+		if(!inputchar.matches("\"")) {
+			throw new IOException("Invalid character input for getLiteralUnit(String): " + inputchar);
+		}
+		//Read until a second " appears
+		String outputValue = "";
+		do {
+			outputValue += inputchar;
+			inputchar = String.valueOf((char)pushbackReader.read());
+		}while(!inputchar.matches("\""));
+
+		//Generate a LITERAL type LexicalUnit with output as Value
+		return new LexicalUnit(LexicalType.LITERAL, new ValueImpl(outputValue));
 	}
 
 	private LexicalUnit getNewLineUnit(String inputchar) throws IOException {
@@ -161,41 +194,23 @@ public class LexicalAnalyzerImpl implements LexicalAnalyzer {
 	}
 
 	private LexicalUnit getSpecialUnit(String inputchar) throws IOException {
-		String outputValue = "";
+		String outputValue ="";
 		char pushbackTmp;
 
-		//Read one, only two characters "<,>" has a valid second character
-		//If it's one of those, check if second character is a valid two character special code
-		//If not pushback one
-		outputValue += inputchar;
-		if(inputchar.matches("<|>")) {
-			String firstChar = inputchar;
-			pushbackTmp = (char)pushbackReader.read();
-			inputchar = String.valueOf(pushbackTmp);
-			switch(firstChar) {
-			case "<":
-				if(inputchar.matches("=|>")) {
-					outputValue += inputchar;
-				} else {
-					pushbackReader.unread(pushbackTmp);
-				}
-				break;
-			case ">":
-				if(inputchar.matches("=")) {
-					outputValue += inputchar;
-				} else {
-					pushbackReader.unread(pushbackTmp);
-				}
-				break;
-			}
-		}
-
-		//If resulting String is a reserved word, generate LexicalUnit with that Type
+		//If inputchar is a reserved word, keep reading for a longest match
+		//Once a longets match is found, generate LexicalUnit with that Type
 		//Else throw an IOException
-		if(reservedSpecialChars.containsKey(outputValue)) {
-			return new LexicalUnit(reservedSpecialChars.get(outputValue));
+		if(reservedSpecialChars.containsKey(inputchar)) {
+			do {
+				outputValue += inputchar;
+				pushbackTmp = (char)pushbackReader.read();
+				inputchar = String.valueOf(pushbackTmp);
+			}while(reservedSpecialChars.containsKey(outputValue + inputchar));
+			pushbackReader.unread(pushbackTmp);
+
+			return new LexicalUnit(reservedSpecialChars.get(outputValue.toString()));
 		}else {
-			throw new IOException("Invalid character input for getSpecialUnit(String): " + outputValue);
+			throw new IOException("Invalid character input for getSpecialUnit(String): " + outputValue.toString());
 		}
 	}
 
