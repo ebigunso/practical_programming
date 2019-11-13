@@ -5,7 +5,7 @@ public class Main {
 	public static void main(String[] args) {
 		LexicalUnit unit;
 		String fname;
-		if(args[0] != null) {
+		if(args.equals(null)) {
 			fname = args[0];
 		}else {
 			fname = "sample.bas";

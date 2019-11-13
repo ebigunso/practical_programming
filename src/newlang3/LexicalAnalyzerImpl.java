@@ -67,11 +67,8 @@ public class LexicalAnalyzerImpl implements LexicalAnalyzer {
 	@Override
 	public LexicalUnit get() throws Exception {
 		//Note: -1 is returned for EOF
-		int readchar = pushbackReader.read();
-		if(readchar == -1) {
-			return new LexicalUnit(LexicalType.EOF);
-		}
-		String strReadchar = String.valueOf((char)readchar);
+		char readchar = (char)pushbackReader.read();
+		String strReadchar = String.valueOf(readchar);
 
 		//Skip if start of unit is a Space or a Tab. Those cases are invalid.
 		//Keep reading until a valid starting character is found
@@ -113,9 +110,12 @@ public class LexicalAnalyzerImpl implements LexicalAnalyzer {
 		//Anything but a number or the first dot followed by a number is invalid
 		//When an invalid character appears, pushback one. If the previous character is a dot, pushback that also
 		boolean hasDot = false;
+		boolean previouslyDot = false;
 		String outputValue = "";
 		char pushbackTmp;
+
 		do {
+			previouslyDot = false;
 			outputValue += inputchar;
 			pushbackTmp = (char)pushbackReader.read();
 			inputchar = String.valueOf(pushbackTmp);
@@ -123,15 +123,29 @@ public class LexicalAnalyzerImpl implements LexicalAnalyzer {
 				if(hasDot) {
 					break;
 				} else {
-					//todo
 					hasDot = true;
+					previouslyDot = true;
+					//Hold off adding dot to output
+					//Read next, if it's valid (ie. a number) add the dot and loop back to keep going
+					pushbackTmp = (char)pushbackReader.read();
+					inputchar = String.valueOf(pushbackTmp);
+					if(inputchar.matches("[0-9]")) {
+						outputValue += ".";
+					}
 				}
 			}
-		}while(inputchar.matches("[0-9]|."));
+		}while(inputchar.matches("[0-9]"));
+
+		if(previouslyDot) {
+			pushbackReader.unread('.');
+		}
 		pushbackReader.unread(pushbackTmp);
 
-		//todo
-		return null;
+		if(hasDot) {
+			return new LexicalUnit(LexicalType.DOUBLEVAL, new ValueImpl(Double.parseDouble(outputValue)));
+		} else {
+			return new LexicalUnit(LexicalType.INTVAL, new ValueImpl(Integer.parseInt(outputValue)));
+		}
 	}
 
 	private LexicalUnit getStringUnit(String inputchar) throws IOException {
