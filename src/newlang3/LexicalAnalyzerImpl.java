@@ -136,10 +136,10 @@ public class LexicalAnalyzerImpl implements LexicalAnalyzer {
 			}
 		}while(inputchar.matches("[0-9]"));
 
+		pushbackReader.unread(pushbackTmp);
 		if(previouslyDot) {
 			pushbackReader.unread('.');
 		}
-		pushbackReader.unread(pushbackTmp);
 
 		if(hasDot) {
 			return new LexicalUnit(LexicalType.DOUBLEVAL, new ValueImpl(Double.parseDouble(outputValue)));
@@ -148,9 +148,9 @@ public class LexicalAnalyzerImpl implements LexicalAnalyzer {
 		}
 	}
 
-	private LexicalUnit getStringUnit(String inputchar) throws IOException {
+	private LexicalUnit getStringUnit(String inputchar) throws Exception {
 		if(!inputchar.matches("[a-z]|[A-Z]")) {
-			throw new IOException("Invalid character input for getStringUnit(String): " + inputchar);
+			throw new Exception("Invalid character input for getStringUnit(String): " + inputchar);
 		}
 		//Read until invalid character appears, then pushback one
 		String outputValue = "";
@@ -171,24 +171,28 @@ public class LexicalAnalyzerImpl implements LexicalAnalyzer {
 		}
 	}
 
-	private LexicalUnit getLiteralUnit(String inputchar) throws IOException {
+	private LexicalUnit getLiteralUnit(String inputchar) throws Exception {
 		if(!inputchar.matches("\"")) {
-			throw new IOException("Invalid character input for getLiteralUnit(String): " + inputchar);
+			throw new Exception("Invalid character input for getLiteralUnit(String): " + inputchar);
 		}
 		//Read until a second " appears
 		String outputValue = "";
 		do {
 			outputValue += inputchar;
 			inputchar = String.valueOf((char)pushbackReader.read());
+			//If coder forgot to close a literal unit (EOF comes up while reading), throw an exception
+			if(inputchar.matches(String.valueOf((char)-1))) {
+				throw new Exception("EOF was read while reading a literal unit.");
+			}
 		}while(!inputchar.matches("\""));
 
 		//Generate a LITERAL type LexicalUnit with output as Value
 		return new LexicalUnit(LexicalType.LITERAL, new ValueImpl(outputValue));
 	}
 
-	private LexicalUnit getNewLineUnit(String inputchar) throws IOException {
+	private LexicalUnit getNewLineUnit(String inputchar) throws Exception {
 		if(!inputchar.matches("\r|\n")) {
-			throw new IOException("Invalid character input for getNewLineUnit(): " + inputchar);
+			throw new Exception("Invalid character input for getNewLineUnit(): " + inputchar);
 		}
 		//inputchar is either \r or \n
 		char pushbackTmp;
@@ -207,7 +211,7 @@ public class LexicalAnalyzerImpl implements LexicalAnalyzer {
 		}
 	}
 
-	private LexicalUnit getSpecialUnit(String inputchar) throws IOException {
+	private LexicalUnit getSpecialUnit(String inputchar) throws Exception {
 		String outputValue ="";
 		char pushbackTmp;
 
@@ -224,7 +228,7 @@ public class LexicalAnalyzerImpl implements LexicalAnalyzer {
 
 			return new LexicalUnit(reservedSpecialChars.get(outputValue.toString()));
 		}else {
-			throw new IOException("Invalid character input for getSpecialUnit(String): " + outputValue.toString());
+			throw new Exception("Invalid character input for getSpecialUnit(String): " + outputValue.toString());
 		}
 	}
 
