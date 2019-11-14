@@ -119,7 +119,7 @@ public class LexicalAnalyzerImpl implements LexicalAnalyzer {
 			outputValue += inputchar;
 			pushbackTmp = (char)pushbackReader.read();
 			inputchar = String.valueOf(pushbackTmp);
-			if(inputchar.matches(".")) {
+			if(inputchar.matches("\\.")) {
 				if(hasDot) {
 					break;
 				} else {
@@ -177,14 +177,19 @@ public class LexicalAnalyzerImpl implements LexicalAnalyzer {
 		}
 		//Read until a second " appears
 		String outputValue = "";
-		do {
-			outputValue += inputchar;
+		while(true) {
 			inputchar = String.valueOf((char)pushbackReader.read());
 			//If coder forgot to close a literal unit (EOF comes up while reading), throw an exception
 			if(inputchar.matches(String.valueOf((char)-1))) {
 				throw new Exception("EOF was read while reading a literal unit.");
 			}
-		}while(!inputchar.matches("\""));
+			//Break when literal is closed
+			if(inputchar.matches("\"")) {
+				break;
+			}
+
+			outputValue += inputchar;
+		}
 
 		//Generate a LITERAL type LexicalUnit with output as Value
 		return new LexicalUnit(LexicalType.LITERAL, new ValueImpl(outputValue));
