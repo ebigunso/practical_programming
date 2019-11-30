@@ -1,16 +1,26 @@
 package newlang3;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+
 public class Main {
 
 	public static void main(String[] args) {
 		LexicalUnit unit;
 		String fname;
+		FileInputStream fin;
 		if(args.length != 0) {
 			fname = args[0];
 		}else {
 			fname = "sample.bas";
 		}
-		LexicalAnalyzer analyzedContent = new LexicalAnalyzerImpl(fname);
+		try {
+			fin = new FileInputStream(fname);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			return;
+		}
+		LexicalAnalyzer analyzedContent = new LexicalAnalyzerImpl(fin);
 
 		while (true) {
 			try {

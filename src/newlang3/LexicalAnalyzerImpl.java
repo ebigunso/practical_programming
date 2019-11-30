@@ -7,8 +7,7 @@ import java.util.Map;
 public class LexicalAnalyzerImpl implements LexicalAnalyzer {
 	static Map<String, LexicalType> reservedWords;
 	static Map<String, LexicalType> reservedSpecialChars;
-	File file;
-	FileReader fileReader;
+	InputStreamReader inputStreamReader;
 	PushbackReader pushbackReader;
 
 	static {
@@ -54,14 +53,9 @@ public class LexicalAnalyzerImpl implements LexicalAnalyzer {
 	}
 
 	//Open file, and set reserved words and defined special characters
-	public LexicalAnalyzerImpl(String fname) {
-		try {
-			file = new File(fname);
-			fileReader = new FileReader(file);
-			pushbackReader = new PushbackReader(fileReader);
-		}catch(FileNotFoundException e) {
-			e.printStackTrace();
-		}
+	public LexicalAnalyzerImpl(FileInputStream fin) {
+		inputStreamReader = new InputStreamReader(fin);
+		pushbackReader = new PushbackReader(inputStreamReader);
 	}
 
 	@Override
@@ -93,7 +87,7 @@ public class LexicalAnalyzerImpl implements LexicalAnalyzer {
 
 	@Override
 	public boolean expect(LexicalType type) throws Exception {
-		// TODO 自動生成されたメソッド・スタブ
+		// TODO ?ｿｽ?ｿｽ?ｿｽ?ｿｽ?ｿｽ?ｿｽ?ｿｽ?ｿｽ?ｿｽ?ｿｽ?ｿｽ黷ｽ?ｿｽ?ｿｽ?ｿｽ\?ｿｽb?ｿｽh?ｿｽE?ｿｽX?ｿｽ^?ｿｽu
 		return false;
 	}
 
