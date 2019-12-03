@@ -2,9 +2,9 @@ a = 5
 
 DO UNTIL a < 1
 
-PRINT ("Hello”)
+PRINT ("Hello")
 
-a = a – 1
+a = a - 1
 
 LOOP
 
