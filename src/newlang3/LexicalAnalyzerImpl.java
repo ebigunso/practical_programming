@@ -96,9 +96,9 @@ public class LexicalAnalyzerImpl implements LexicalAnalyzer {
 
 	}
 
-	private LexicalUnit getIntUnit(String inputchar) throws IOException {
+	private LexicalUnit getIntUnit(String inputchar) throws Exception {
 		if(!inputchar.matches("[0-9]")) {
-			throw new IOException("Invalid character input for getIntUnit(String): " + inputchar);
+			throw new Exception("Invalid character input for getIntUnit(String): " + inputchar);
 		}
 		//Read until invalid character appears
 		//Anything but a number or the first dot followed by a number is invalid
@@ -215,8 +215,8 @@ public class LexicalAnalyzerImpl implements LexicalAnalyzer {
 		char pushbackTmp;
 
 		//If inputchar is a reserved word, keep reading for a longest match
-		//Once a longets match is found, generate LexicalUnit with that Type
-		//Else throw an IOException
+		//Once a longest match is found, generate LexicalUnit with that Type
+		//Else throw an Exception
 		if(reservedSpecialChars.containsKey(inputchar)) {
 			do {
 				outputValue += inputchar;
