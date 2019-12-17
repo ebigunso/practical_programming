@@ -1,14 +1,14 @@
 package newlang4;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class LexicalAnalyzerImpl implements LexicalAnalyzer {
-	static Map<String, LexicalType> reservedWords;
-	static Map<String, LexicalType> reservedSpecialChars;
-	InputStreamReader inputStreamReader;
-	PushbackReader pushbackReader;
+	private static Map<String, LexicalType> reservedWords;
+	private static Map<String, LexicalType> reservedSpecialChars;
+	private List<LexicalUnit> ungetBuffer;
+	private InputStreamReader inputStreamReader;
+	private PushbackReader pushbackReader;
 
 	static {
 		reservedWords = new HashMap<String, LexicalType>();
@@ -52,14 +52,22 @@ public class LexicalAnalyzerImpl implements LexicalAnalyzer {
 		reservedSpecialChars.put(String.valueOf((char)(-1)), LexicalType.EOF);
 	}
 
-	//Open file, and set reserved words and defined special characters
+	//Create reader and buffer
 	public LexicalAnalyzerImpl(FileInputStream fin) {
 		inputStreamReader = new InputStreamReader(fin);
 		pushbackReader = new PushbackReader(inputStreamReader);
+		ungetBuffer = new ArrayList<LexicalUnit>();
 	}
 
 	@Override
 	public LexicalUnit get() throws Exception {
+		//Return from end of ungetBuffer if anything is inside
+		if(!ungetBuffer.isEmpty()) {
+			LexicalUnit retUnit = ungetBuffer.get(ungetBuffer.size()-1);
+			ungetBuffer.remove(ungetBuffer.size()-1);
+			return retUnit;
+		}
+
 		//Note: -1 is returned for EOF
 		char readchar = (char)pushbackReader.read();
 		String strReadchar = String.valueOf(readchar);
@@ -85,15 +93,24 @@ public class LexicalAnalyzerImpl implements LexicalAnalyzer {
 		return getSpecialUnit(strReadchar);
 	}
 
+	//Returns true when "type" matches the type of the next LexicalUnit
 	@Override
 	public boolean expect(LexicalType type) throws Exception {
-		// TODO ?ｿｽ?ｿｽ?ｿｽ?ｿｽ?ｿｽ?ｿｽ?ｿｽ?ｿｽ?ｿｽ?ｿｽ?ｿｽ黷ｽ?ｿｽ?ｿｽ?ｿｽ\?ｿｽb?ｿｽh?ｿｽE?ｿｽX?ｿｽ^?ｿｽu
-		return false;
+		return type == peek().getType();
 	}
 
 	@Override
 	public void unget(LexicalUnit token) throws Exception {
+		ungetBuffer.add(token);
+	}
 
+	//Take a peek at the next LexicalUnit, not advancing the pointer
+	@Override
+	public LexicalUnit peek() throws Exception {
+		LexicalUnit retUnit = get();
+		unget(retUnit);
+
+		return retUnit;
 	}
 
 	private LexicalUnit getIntUnit(String inputchar) throws Exception {

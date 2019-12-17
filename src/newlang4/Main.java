@@ -8,25 +8,25 @@ public class Main {
 	 * @param args
 	 */
 	public static void main(String[] args) throws Exception {
-	       FileInputStream fin = null;
+	      	FileInputStream fin = null;
 	        LexicalAnalyzer lex;
 	        LexicalUnit		first;
 	        Environment		env;
-	        Node			program;
-	  
+
 	        System.out.println("basic parser");
-	        fin = new FileInputStream("test.txt");
+	        fin = new FileInputStream(args[0]);
 	        lex = new LexicalAnalyzerImpl(fin);
 	        env = new Environment(lex);
-	        first = lex.get();
-	        
-	        if (Program.First(first)) {
+	        first = lex.peek();
+
+	        try {
 	        	Node handler = Program.getHandler(first, env);
-	        	handler.Parse();
-	        	System.out.println(program);
-	        	System.out.println("value = " + program.getValue());
+	        	handler.parse();
+	        	System.out.println(handler);
+	        	System.out.println("value = " + handler.getValue());
+	        } catch (Exception e) {
+	        	e.printStackTrace();
 	        }
-	        else System.out.println("syntax error");
 	}
 
 }
