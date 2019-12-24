@@ -17,7 +17,14 @@ public class StmtNode extends Node {
 
 	public static Node getHandler(LexicalUnit first, Environment env) throws Exception {
 		switch(first.getType()) {
-//		case NAME:
+		case NAME:
+			if(env.getInput().expect(2, LexicalType.EQ)) {
+//				return SubstNode.getHandler(first, env);
+//			} else if (env.getInput().expect(2, LexicalType.LP)) {
+//				return CallFuncNode.getHandler(first, env);
+			} else {
+				throw new Exception("Syntax Error: Invalid start for SubstNode or CallFuncNode");
+			}
 //		case FOR:
 		case END:
 			return EndNode.getHandler(first, env);

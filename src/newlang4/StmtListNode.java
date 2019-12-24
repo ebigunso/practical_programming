@@ -50,8 +50,10 @@ public class StmtListNode extends Node {
 			//May throw exception
 			if(StmtNode.isFirst(peeked)) {
 				handler = StmtNode.getHandler(peeked, env);
-//			} else if(Block.isFirst(peeked)){
-//				handler = BlockNode.getHandler(peeked, env);
+//			} else if(IfBlockNode.isFirst(peeked)){
+//				handler = IfBlockNode.getHandler(peeked, env);
+//			} else if(LoopBlockNode.isFirst(peeked)) {
+//				handler = LoopBlockNode.getHandeler(peeked, env);
 			} else {
 				//Return true if parse successful
 				return true;

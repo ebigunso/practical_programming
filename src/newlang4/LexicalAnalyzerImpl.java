@@ -99,6 +99,12 @@ public class LexicalAnalyzerImpl implements LexicalAnalyzer {
 		return type == peek().getType();
 	}
 
+	//Do expect for LexicalUnit specified units ahead
+	@Override
+	public boolean expect(int ahead, LexicalType type) throws Exception {
+		return type == peek(ahead).getType();
+	}
+
 	@Override
 	public void unget(LexicalUnit token) throws Exception {
 		ungetBuffer.add(token);
@@ -111,6 +117,25 @@ public class LexicalAnalyzerImpl implements LexicalAnalyzer {
 		unget(retUnit);
 
 		return retUnit;
+	}
+
+	//Take a peek at the LexicalUnit specified units ahead
+	@Override
+	public LexicalUnit peek(int ahead) throws Exception {
+		List<LexicalUnit> peekBuffer = new ArrayList<LexicalUnit>();
+		LexicalUnit nowPeeking = null;
+		for(int i = 0; i < ahead; i++) {
+			nowPeeking = get();
+			peekBuffer.add(nowPeeking);
+		}
+
+		while(!peekBuffer.isEmpty()) {
+			int bufferEnd = peekBuffer.size() - 1;
+			unget(peekBuffer.get(bufferEnd));
+			peekBuffer.remove(bufferEnd);
+		}
+
+		return nowPeeking;
 	}
 
 	private LexicalUnit getIntUnit(String inputchar) throws Exception {

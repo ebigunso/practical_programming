@@ -43,7 +43,7 @@ public class EndNode extends Node {
 	}
 
 	public Value getValue() {
-		//todo
+		System.exit(0);
 		return null;
 	}
 }
