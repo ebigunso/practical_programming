@@ -35,11 +35,6 @@ public class Program extends Node {
 
 	@Override
 	public boolean parse() throws Exception {
-		//Skip any NL at the start
-		while(env.getInput().expect(LexicalType.NL)) {
-			env.getInput().get();
-		}
-
     	stmt_list = StmtListNode.getHandler(env.getInput().peek(), env); //This may throw an Exception
     	stmt_list.parse();
 

@@ -1,5 +1,6 @@
 package newlang4;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -13,7 +14,8 @@ public class StmtListNode extends Node {
 			LexicalType.END,
 			LexicalType.IF,
 			LexicalType.WHILE,
-			LexicalType.DO
+			LexicalType.DO,
+			LexicalType.NL
 			);
 
 	public static boolean isFirst(LexicalUnit unit) {
@@ -34,10 +36,42 @@ public class StmtListNode extends Node {
 	}
 
 	public boolean parse() throws Exception {
-		LexicalUnit peeked = env.getInput().peek();
+		nodes = new ArrayList<Node>();
+		LexicalUnit peeked;
+		Node handler;
 
-		//Return true if parse successful
-		return true;
+		while(true) {
+			//Skip any extra NL at the start
+			while (env.getInput().expect(LexicalType.NL)) {
+				env.getInput().get();
+			}
+			peeked = env.getInput().peek();
+
+			//May throw exception
+			if(StmtNode.isFirst(peeked)) {
+				handler = StmtNode.getHandler(peeked, env);
+//			} else if(Block.isFirst(peeked)){
+//				handler = BlockNode.getHandler(peeked, env);
+			} else {
+				//Return true if parse successful
+				return true;
+			}
+			handler.parse();
+			nodes.add(handler);
+		}
+	}
+
+	public String toString() {
+		String strings = "";
+		for(int i = 0; i < nodes.size(); i++) {
+			strings += nodes.get(i).toString();
+		}
+		return strings;
+	}
+
+	public Value getValue() {
+		//todo
+		return null;
 	}
 
 }
