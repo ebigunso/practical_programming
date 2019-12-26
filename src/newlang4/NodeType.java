@@ -18,4 +18,6 @@ public enum NodeType {
     DOUBLE_CONSTANT,
     BOOL_CONSTANT,
     END,
+    BIN_EXPR, //original
+    VAR //original
 }

@@ -122,17 +122,14 @@ public class LexicalAnalyzerImpl implements LexicalAnalyzer {
 	//Take a peek at the LexicalUnit specified units ahead
 	@Override
 	public LexicalUnit peek(int ahead) throws Exception {
-		List<LexicalUnit> peekBuffer = new ArrayList<LexicalUnit>();
+		Stack<LexicalUnit> peekStack = new Stack<LexicalUnit>();
 		LexicalUnit nowPeeking = null;
 		for(int i = 0; i < ahead; i++) {
-			nowPeeking = get();
-			peekBuffer.add(nowPeeking);
+			peekStack.push(nowPeeking = get());
 		}
 
-		while(!peekBuffer.isEmpty()) {
-			int bufferEnd = peekBuffer.size() - 1;
-			unget(peekBuffer.get(bufferEnd));
-			peekBuffer.remove(bufferEnd);
+		while(!peekStack.isEmpty()) {
+			unget(peekStack.pop());
 		}
 
 		return nowPeeking;

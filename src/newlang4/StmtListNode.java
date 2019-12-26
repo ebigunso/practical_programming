@@ -37,8 +37,8 @@ public class StmtListNode extends Node {
 
 	public boolean parse() throws Exception {
 		nodes = new ArrayList<Node>();
-		LexicalUnit peeked;
-		Node handler;
+		LexicalUnit peeked = null;
+		Node handler = null;
 
 		while(true) {
 			//Skip any extra NL at the start
@@ -55,11 +55,15 @@ public class StmtListNode extends Node {
 //			} else if(LoopBlockNode.isFirst(peeked)) {
 //				handler = LoopBlockNode.getHandeler(peeked, env);
 			} else {
-				//Return true if parse successful
-				return true;
+				throw new Exception("Syntax Error: Invalid unit " + handler + "was read");
 			}
 			handler.parse();
 			nodes.add(handler);
+
+			if(handler.getType() == NodeType.END) {
+				//Return true if parse successful
+				return true;
+			}
 		}
 	}
 

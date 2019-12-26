@@ -4,7 +4,7 @@ import java.util.EnumSet;
 import java.util.Set;
 
 public class Program extends Node {
-	Node stmt_list = null;
+	Node stmtList = null;
 
 	private static final Set<LexicalType> FIRSTSET = EnumSet.of(
 			LexicalType.NAME,
@@ -35,8 +35,8 @@ public class Program extends Node {
 
 	@Override
 	public boolean parse() throws Exception {
-    	stmt_list = StmtListNode.getHandler(env.getInput().peek(), env); //This may throw an Exception
-    	stmt_list.parse();
+    	stmtList = StmtListNode.getHandler(env.getInput().peek(), env); //This may throw an Exception
+    	stmtList.parse();
 
 		//Check if END is actually written at the end of the code
 		//Skip NL after END, see if next non NL unit is EOF
@@ -44,7 +44,7 @@ public class Program extends Node {
 			env.getInput().get();
 		}
 		if(!env.getInput().expect(LexicalType.EOF)) {
-			throw new Exception("Syntax Error: Something is written after END");
+			throw new Exception("Syntax Error: END must be written at the end of the program");
 		}
 
 		//return true if parse successful
@@ -53,7 +53,7 @@ public class Program extends Node {
 
 	@Override
 	public String toString() {
-		return stmt_list.toString();
+		return stmtList.toString();
 	}
 
 	public Value getValue() {
