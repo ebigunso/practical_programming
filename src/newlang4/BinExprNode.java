@@ -20,7 +20,7 @@ public class BinExprNode extends Node {
 		return OPERATORS.containsKey(inputType);
 	}
 
-	public static Node getHandler(LexicalType operator) throws Exception {
+	public static BinExprNode getHandler(LexicalType operator) throws Exception {
 		if(!isOperator(operator)){
 			throw new Exception("Syntax Error: Input for BinExprNode is not a valid operator");
 		} else {
@@ -41,6 +41,10 @@ public class BinExprNode extends Node {
 		right = rightNode;
 	}
 
+	public int getOperatorPriority() {
+		return OPERATORS.get(op);
+	}
+
 	@Override
 	public boolean parse() throws Exception {
 		throw new Exception("Parsing Error: Parse cannnot be run for BinExprNode");
@@ -48,7 +52,23 @@ public class BinExprNode extends Node {
 
 	@Override
 	public String toString() {
-		return op.toString();
+		String operator = "";
+		switch(op) {
+		case DIV:
+			operator = "/";
+			break;
+		case MUL:
+			operator = "*";
+			break;
+		case SUB:
+			operator = "-";
+			break;
+		case ADD:
+			operator = "+";
+			break;
+		default:
+		}
+		return operator + "[" + left.toString() + "," + right.toString() + "]" ;
 	}
 
 	@Override

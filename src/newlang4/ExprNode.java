@@ -9,7 +9,8 @@ import java.util.Set;
 
 public class ExprNode extends Node {
 	List<Node> operandNodes = new ArrayList<Node>();
-	List<Node> operatorNodes = new ArrayList<Node>();
+	List<BinExprNode> binExprNodes = new ArrayList<BinExprNode>();
+	BinExprNode primedNode = null; //Final result of setBinExprNodes() goes in here
 
 	private static final Set<LexicalType> FIRSTSET = EnumSet.of(
 			LexicalType.NAME,
@@ -52,12 +53,14 @@ public class ExprNode extends Node {
 			operandNodes.add(operand);
 
 			//getOperator() returns null if the next unit is not an operator
-			Node operator = getOperator();
+			BinExprNode operator = getOperator();
 			if(operator == null) {
 				break;
 			}
-			operatorNodes.add(operator);
+			binExprNodes.add(operator);
 		}
+
+		primedNode = setBinExprNodes();
 
 		return true;
 	}
@@ -86,7 +89,7 @@ public class ExprNode extends Node {
 				env.getInput().get();
 				LexicalUnit negative = new LexicalUnit(LexicalType.INTVAL, new ValueImpl(-1));
 				operandNodes.add(ConstNode.getHandler(negative, env));
-				operatorNodes.add(BinExprNode.getHandler(LexicalType.MUL));
+				binExprNodes.add(BinExprNode.getHandler(LexicalType.MUL));
 				return getOperand();
 			} else {
 				throw new Exception("Syntax Error: Invalid unit after \"-\" in ExprNode");
@@ -94,7 +97,8 @@ public class ExprNode extends Node {
 		case INTVAL:
 		case DOUBLEVAL:
 		case LITERAL:
-			Node constHandler = ConstNode.getHandler(env.getInput().get(), env);
+			Node constHandler = ConstNode.getHandler(env.getInput().peek(), env);
+			env.getInput().get();
 			return constHandler;
 		case NAME:
 			if(env.getInput().expect(2, LexicalType.LP)) {
@@ -114,7 +118,7 @@ public class ExprNode extends Node {
 		return null;
 	}
 
-	private Node getOperator() throws Exception {
+	private BinExprNode getOperator() throws Exception {
 		//Signal end of Expr when next unit is not an operator
 		LexicalUnit peeked = env.getInput().peek();
 		if(!OPERATORS.containsKey(peeked.getType())) {
@@ -125,19 +129,56 @@ public class ExprNode extends Node {
 		return BinExprNode.getHandler(env.getInput().get().getType());
 	}
 
+	private BinExprNode setBinExprNodes() throws Exception {
+		if(operandNodes.size() < 2 || binExprNodes.size() < 1) {
+			throw new Exception("Parsing Error: Not enough operands or operators in ExprNode");
+		}
+		boolean hasPending = false;
+		int pendingID = 999;
+		int priorityPrev, priorityNow;
+
+		binExprNodes.get(0).setLeft(operandNodes.get(0));
+		for(int i = 1; i < operandNodes.size()-1; i++) {
+			priorityPrev = binExprNodes.get(i-1).getOperatorPriority();
+			priorityNow = binExprNodes.get(i).getOperatorPriority();
+			if(priorityPrev == priorityNow) {
+				//Take current operand and setRight() it to the previous binExprNode
+				//Then take previous binExprNode and setLeft() it to the current binExprNode
+				binExprNodes.get(i-1).setRight(operandNodes.get(i));
+				binExprNodes.get(i).setLeft(binExprNodes.get(i-1));
+			} else if(priorityPrev > priorityNow) {
+				//When current priority is higher
+				hasPending = true;
+				pendingID = i-1;
+				binExprNodes.get(i).setLeft(operandNodes.get(i));
+			} else {
+				//When current priority is lower
+				binExprNodes.get(i-1).setRight(operandNodes.get(i));
+				if(!hasPending) {
+					binExprNodes.get(i).setLeft(binExprNodes.get(i-1));
+				} else {
+					binExprNodes.get(pendingID).setRight(binExprNodes.get(i-1));
+					binExprNodes.get(i).setLeft(binExprNodes.get(pendingID));
+					hasPending = false;
+				}
+			}
+		}
+		BinExprNode lastBinExpr = binExprNodes.get(operandNodes.size()-2);
+		Node lastOperand = operandNodes.get(operandNodes.size()-1);
+		lastBinExpr.setRight(lastOperand);
+
+		//For when Expr ends on a high priority operator
+		if(hasPending) {
+			binExprNodes.get(pendingID).setRight(lastBinExpr);
+			return binExprNodes.get(pendingID);
+		}
+
+		return lastBinExpr;
+	}
+
 	@Override
 	public String toString() {
-		String out = "";
-		for(int i = 0; (i < operandNodes.size()) && (i < operatorNodes.size()+1); i++) {
-			out += operandNodes.get(i).toString();
-			if(i >= operatorNodes.size()) {
-				break;
-			} else {
-				out += " ";
-			}
-			out += operatorNodes.get(i).toString() + " ";
-		}
-		return out;
+		return primedNode.toString();
 	}
 
 	@Override
