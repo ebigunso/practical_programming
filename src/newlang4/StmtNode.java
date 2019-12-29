@@ -20,8 +20,8 @@ public class StmtNode extends Node {
 		case NAME:
 			if(env.getInput().expect(2, LexicalType.EQ)) {
 				return SubstNode.getHandler(first, env);
-//			} else if (env.getInput().expect(2, LexicalType.LP)) {
-//				return CallFuncNode.getHandler(first, env);
+			} else if (env.getInput().expect(2, LexicalType.LP)) {
+				return CallFuncNode.getHandler(first, env);
 			} else {
 				throw new Exception("Syntax Error: Invalid start for SubstNode or CallFuncNode(" + first + ")");
 			}

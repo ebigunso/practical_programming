@@ -10,7 +10,7 @@ import java.util.Set;
 public class ExprNode extends Node {
 	List<Node> operandNodes = new ArrayList<Node>();
 	List<BinExprNode> binExprNodes = new ArrayList<BinExprNode>();
-	BinExprNode primedNode = null; //Final result of setBinExprNodes() goes in here
+	Node primedNode = null; //Final result of setBinExprNodes() goes in here
 
 	private static final Set<LexicalType> FIRSTSET = EnumSet.of(
 			LexicalType.NAME,
@@ -60,7 +60,12 @@ public class ExprNode extends Node {
 			binExprNodes.add(operator);
 		}
 
-		primedNode = setBinExprNodes();
+		if(operandNodes.size() == 1 && binExprNodes.size() == 0) {
+			//For cases with only one operand
+			primedNode = operandNodes.get(0);
+		} else {
+			primedNode = setBinExprNodes();
+		}
 
 		return true;
 	}
@@ -102,20 +107,17 @@ public class ExprNode extends Node {
 			return constHandler;
 		case NAME:
 			if(env.getInput().expect(2, LexicalType.LP)) {
-//				Node funcHandler = CallFuncNode.getHandler(env.getInput().peek(), env);
-//				funcHandler.parse();
-//				return funcHandler;
+				Node funcHandler = CallFuncNode.getHandler(env.getInput().peek(), env);
+				funcHandler.parse();
+				return funcHandler;
 			} else {
 				Node varHandler = VariableNode.getHandler(env.getInput().peek().getType(), env);
 				env.getInput().get();
 				return varHandler;
 			}
-			break;
 		default:
 			throw new Exception("Syntax Error: Invalid start for ExprNode");
 		}
-
-		return null;
 	}
 
 	private BinExprNode getOperator() throws Exception {
@@ -129,7 +131,7 @@ public class ExprNode extends Node {
 		return BinExprNode.getHandler(env.getInput().get().getType());
 	}
 
-	private BinExprNode setBinExprNodes() throws Exception {
+	private Node setBinExprNodes() throws Exception {
 		if(operandNodes.size() < 2 || binExprNodes.size() < 1) {
 			throw new Exception("Parsing Error: Not enough operands or operators in ExprNode");
 		}

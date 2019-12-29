@@ -57,7 +57,7 @@ public class SubstNode extends Node {
 
 	@Override
 	public String toString() {
-		return "Subst: " + leftVar.toString() + " = [Expr: " + expr.toString() + "]\n";
+		return "Subst: " + leftVar.toString() + " = [Expr: " + expr.toString() + "]";
 	}
 
 	public Value getValue() {

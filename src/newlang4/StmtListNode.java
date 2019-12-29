@@ -50,12 +50,10 @@ public class StmtListNode extends Node {
 			//May throw exception
 			if(StmtNode.isFirst(peeked)) {
 				handler = StmtNode.getHandler(peeked, env);
-//			} else if(IfBlockNode.isFirst(peeked)){
-//				handler = IfBlockNode.getHandler(peeked, env);
-//			} else if(LoopBlockNode.isFirst(peeked)) {
-//				handler = LoopBlockNode.getHandeler(peeked, env);
+			} else if(BlockNode.isFirst(peeked)){
+				handler = BlockNode.getHandler(peeked, env);
 			} else {
-				throw new Exception("Syntax Error: Invalid unit " + handler + "was read");
+				throw new Exception("Syntax Error: Invalid unit " + handler + " was read");
 			}
 			handler.parse();
 			nodes.add(handler);
@@ -70,7 +68,7 @@ public class StmtListNode extends Node {
 	public String toString() {
 		String strings = "";
 		for(int i = 0; i < nodes.size(); i++) {
-			strings += nodes.get(i).toString();
+			strings += nodes.get(i).toString() + "\n";
 		}
 		return strings;
 	}
