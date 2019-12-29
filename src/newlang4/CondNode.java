@@ -64,7 +64,29 @@ public class CondNode extends Node {
 
 	@Override
 	public String toString() {
-		return "[Cond: " + left + " " + operator + " " + right + "]";
+		String opOut = null;
+		switch(operator) {
+		case EQ:
+			opOut = "=";
+			break;
+		case NE:
+			opOut = "!=";
+			break;
+		case GT:
+			opOut = ">";
+			break;
+		case GE:
+			opOut = ">=";
+			break;
+		case LT:
+			opOut = "<";
+			break;
+		case LE:
+			opOut = "<=";
+			break;
+		default:
+		}
+		return "[Cond: " + left + " " + opOut + " " + right + "]";
 	}
 
 	@Override

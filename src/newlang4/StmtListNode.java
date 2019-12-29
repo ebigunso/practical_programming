@@ -53,22 +53,20 @@ public class StmtListNode extends Node {
 			} else if(BlockNode.isFirst(peeked)){
 				handler = BlockNode.getHandler(peeked, env);
 			} else {
-				throw new Exception("Syntax Error: Invalid unit " + handler + " was read");
+				return true;
 			}
 			handler.parse();
 			nodes.add(handler);
-
-			if(handler.getType() == NodeType.END) {
-				//Return true if parse successful
-				return true;
-			}
 		}
 	}
 
 	public String toString() {
 		String strings = "";
 		for(int i = 0; i < nodes.size(); i++) {
-			strings += nodes.get(i).toString() + "\n";
+			strings += nodes.get(i).toString();
+			if(nodes.get(i).getType() != NodeType.END) {
+				strings += "\n";
+			}
 		}
 		return strings;
 	}

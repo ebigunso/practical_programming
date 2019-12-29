@@ -146,4 +146,10 @@ public class IfBlockNode extends Node {
 		}
 		return out;
 	}
+
+	@Override
+	public Value getValue() {
+		//todo
+		return null;
+	}
 }

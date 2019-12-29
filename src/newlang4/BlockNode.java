@@ -17,8 +17,8 @@ public class BlockNode extends Node {
 	public static Node getHandler(LexicalUnit first, Environment env) throws Exception {
 		if(IfBlockNode.isFirst(first)) {
 			return IfBlockNode.getHandler(first, env);
-//		} else if(LoopBlockNode.isFirst(first)) {
-//			return LoopBlockNode.getHandler(first, env);
+		} else if(LoopBlockNode.isFirst(first)) {
+			return LoopBlockNode.getHandler(first, env);
 		} else {
 			throw new Exception("Syntax Error: Invalid start for BlockNode");
 		}
@@ -34,6 +34,7 @@ public class BlockNode extends Node {
 		throw new Exception("Parsing Error: Parse cannot be run for BlockNode");
 	}
 
+	//unused
 	@Override
 	public String toString() {
 		return "Block";
