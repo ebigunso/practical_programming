@@ -9,7 +9,8 @@ public class IfBlockNode extends Node {
 	Node elseOp = null;
 
 	private static final Set<LexicalType> FIRSTSET = EnumSet.of(
-			LexicalType.IF
+			LexicalType.IF,
+			LexicalType.ELSEIF
 			);
 
 	public static boolean isFirst(LexicalUnit unit) {
@@ -26,7 +27,7 @@ public class IfBlockNode extends Node {
 
 	private IfBlockNode(Environment env) {
 		super(env);
-		type = NodeType.BLOCK;
+		type = NodeType.IF_BLOCK;
 	}
 
 	@Override
@@ -77,15 +78,12 @@ public class IfBlockNode extends Node {
 			op.parse();
 
 			if(env.getInput().expect(LexicalType.NL)) {
-				env.getInput().get();
+				getNL();
 			} else {
 				throw new Exception("Syntax Error: Missing NL after operation for IF or ELSEIF");
 			}
 
 			if(env.getInput().expect(LexicalType.ELSEIF)) {
-				//ELSEIF
-				env.getInput().get();
-
 				elseOp = IfBlockNode.getHandler(env.getInput().peek(), env);
 				elseOp.parse();
 			} else if(env.getInput().expect(LexicalType.ELSE)) {
@@ -93,7 +91,7 @@ public class IfBlockNode extends Node {
 				env.getInput().get();
 
 				if(env.getInput().expect(LexicalType.NL)) {
-					env.getInput().get();
+					getNL();
 				} else {
 					throw new Exception("Syntax Error: Missing NL after ELSE in IfBlockNode");
 				}
@@ -102,7 +100,7 @@ public class IfBlockNode extends Node {
 				elseOp.parse();
 
 				if(env.getInput().expect(LexicalType.NL)) {
-					env.getInput().get();
+					getNL();
 				} else {
 					throw new Exception("Syntax Error: Missing NL after operation for ELSE");
 				}
@@ -133,16 +131,29 @@ public class IfBlockNode extends Node {
 		return true;
 	}
 
+	//Skip any number of NLs
+	private void getNL() throws Exception {
+		while(env.getInput().expect(LexicalType.NL)) {
+			env.getInput().get();
+		}
+	}
+
 	@Override
 	public String toString() {
 		String out = "IF: " + cond.toString() + "\n";
 		out += op.toString();
+		if(op.getType() != NodeType.STMT_LIST) {
+			out += "\n";
+		}
 		if(elseOp != null) {
 			out += "ELSE";
 			if(elseOp.getType() != NodeType.IF_BLOCK) {
 				out += ":\n";
 			};
 			out += elseOp.toString();
+			if(op.getType() != NodeType.STMT_LIST) {
+				out += "\n";
+			}
 		}
 		return out + "EndIf";
 	}

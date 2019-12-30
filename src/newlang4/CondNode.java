@@ -47,8 +47,8 @@ public class CondNode extends Node {
 	public boolean parse() throws Exception {
 		//Expected input: Expr operator Expr
 
-		right = ExprNode.getHandler(env.getInput().peek(), env); //May throw Exception
-		right.parse();
+		left = ExprNode.getHandler(env.getInput().peek(), env); //May throw Exception
+		left.parse();
 
 		if(OPERATORS.contains(env.getInput().peek().getType())) {
 			operator = env.getInput().get().getType();
@@ -56,8 +56,8 @@ public class CondNode extends Node {
 			throw new Exception("Syntax Error: Invalid operator in CondNode");
 		}
 
-		left = ExprNode.getHandler(env.getInput().peek(), env); //May throw Exception
-		left.parse();
+		right = ExprNode.getHandler(env.getInput().peek(), env); //May throw Exception
+		right.parse();
 
 		return true;
 	}

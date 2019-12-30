@@ -49,6 +49,12 @@ public class LoopBlockNode extends Node {
 			operation = StmtListNode.getHandler(env.getInput().peek(), env); //May throw Exception
 			operation.parse();
 
+			if(env.getInput().expect(LexicalType.NL)) {
+				getNL();
+			} else {
+				throw new Exception("Syntax Error: Missing NL after operation in LoopBlockNode");
+			}
+
 			if(env.getInput().expect(LexicalType.WEND)) {
 				env.getInput().get();
 			} else {
@@ -69,6 +75,12 @@ public class LoopBlockNode extends Node {
 
 			operation = StmtListNode.getHandler(env.getInput().peek(), env); //May throw Exception
 			operation.parse();
+
+			if(env.getInput().expect(LexicalType.NL)) {
+				getNL();
+			} else {
+				throw new Exception("Syntax Error: Missing NL after operation in LoopBlockNode");
+			}
 
 			if(env.getInput().expect(LexicalType.LOOP)) {
 				env.getInput().get();
@@ -106,6 +118,13 @@ public class LoopBlockNode extends Node {
 
 			cond = CondNode.getHandler(env.getInput().peek(), env); //May throw Exception
 			cond.parse();
+		}
+	}
+
+	//Skip any number of NLs
+	private void getNL() throws Exception {
+		while(env.getInput().expect(LexicalType.NL)) {
+			env.getInput().get();
 		}
 	}
 

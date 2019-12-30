@@ -61,7 +61,7 @@ public class ForNode extends Node {
 		operation.parse();
 
 		if(env.getInput().expect(LexicalType.NL)) {
-			env.getInput().get();
+			getNL();
 		} else {
 			throw new Exception("Syntax Error: Missing NL after operation in ForNode");
 		}
@@ -80,6 +80,13 @@ public class ForNode extends Node {
 		env.getInput().get();
 
 		return true;
+	}
+
+	//Skip any number of NLs
+	private void getNL() throws Exception {
+		while(env.getInput().expect(LexicalType.NL)) {
+			env.getInput().get();
+		}
 	}
 
 	@Override
