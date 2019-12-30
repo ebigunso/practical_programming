@@ -42,8 +42,10 @@ public class StmtListNode extends Node {
 
 		while(true) {
 			//Skip any extra NL at the start
+			int skippedNLs = 0;
 			while (env.getInput().expect(LexicalType.NL)) {
 				env.getInput().get();
+				skippedNLs++;
 			}
 			peeked = env.getInput().peek();
 
@@ -53,10 +55,17 @@ public class StmtListNode extends Node {
 			} else if(BlockNode.isFirst(peeked)){
 				handler = BlockNode.getHandler(peeked, env);
 			} else {
+				for(int i = 0; i < skippedNLs; i++) {
+					env.getInput().unget(new LexicalUnit(LexicalType.NL));
+				}
 				return true;
 			}
 			handler.parse();
 			nodes.add(handler);
+
+			if(handler.getType() == NodeType.END) {
+				return true;
+			}
 		}
 	}
 

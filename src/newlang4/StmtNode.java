@@ -23,9 +23,10 @@ public class StmtNode extends Node {
 			} else if (env.getInput().expect(2, LexicalType.LP)) {
 				return CallFuncNode.getHandler(first, env);
 			} else {
-				throw new Exception("Syntax Error: Invalid start for SubstNode or CallFuncNode(" + first + ")");
+				throw new Exception("Syntax Error: Invalid start for SubstNode or CallFuncNode(" + first + " " + env.getInput().peek(2) + ")");
 			}
-//		case FOR:
+		case FOR:
+			return ForNode.getHandler(first, env);
 		case END:
 			return EndNode.getHandler(first, env);
 		default:

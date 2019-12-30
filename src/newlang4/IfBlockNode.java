@@ -138,13 +138,13 @@ public class IfBlockNode extends Node {
 		String out = "IF: " + cond.toString() + "\n";
 		out += op.toString();
 		if(elseOp != null) {
-			out += "\nELSE";
+			out += "ELSE";
 			if(elseOp.getType() != NodeType.IF_BLOCK) {
 				out += ":\n";
 			};
 			out += elseOp.toString();
 		}
-		return out;
+		return out + "EndIf";
 	}
 
 	@Override
