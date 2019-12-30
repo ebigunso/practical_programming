@@ -159,8 +159,12 @@ public class IfBlockNode extends Node {
 	}
 
 	@Override
-	public Value getValue() {
-		//todo
+	public Value getValue() throws Exception {
+		if(cond.getValue().getBValue() == true) {
+			op.getValue();
+		} else if(elseOp != null) {
+			elseOp.getValue();
+		}
 		return null;
 	}
 }

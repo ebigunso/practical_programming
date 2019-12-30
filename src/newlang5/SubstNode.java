@@ -60,8 +60,8 @@ public class SubstNode extends Node {
 		return "Subst: " + leftVar.toString() + " = [Expr: " + expr.toString() + "]";
 	}
 
-	public Value getValue() {
-		//todo
+	public Value getValue() throws Exception {
+		leftVar.setValue(expr.getValue());
 		return null;
 	}
 }

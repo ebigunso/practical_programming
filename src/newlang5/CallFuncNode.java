@@ -5,7 +5,7 @@ import java.util.Set;
 
 public class CallFuncNode extends Node {
 	String funcName = null;
-	Node arguments = null;
+	ExprListNode arguments = null;
 
 	private static final Set<LexicalType> FIRSTSET = EnumSet.of(
 			LexicalType.NAME
@@ -50,7 +50,7 @@ public class CallFuncNode extends Node {
 		if(env.getInput().peek().getType() == LexicalType.RP) {
 			//If there is no argument, do nothing
 		} else if(ExprListNode.isFirst(env.getInput().peek())) {
-			arguments = ExprListNode.getHandler(env.getInput().peek(), env);
+			arguments = (ExprListNode)ExprListNode.getHandler(env.getInput().peek(), env);
 			arguments.parse();
 		} else {
 			throw new Exception("Syntax Error: Invalid start for argument in CallFuncNode");
@@ -77,8 +77,7 @@ public class CallFuncNode extends Node {
 
 	@Override
 	public Value getValue() {
-		//todo
-		return null;
+		return env.getFunction(funcName).invoke(arguments);
 	}
 
 }

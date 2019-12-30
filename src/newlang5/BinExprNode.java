@@ -72,9 +72,48 @@ public class BinExprNode extends Node {
 	}
 
 	@Override
-	public Value getValue() {
-		//todo
-		return null;
-	}
+	public Value getValue() throws Exception {
+		if(left == null || right == null) {
+			throw new Exception("Calculation Error: One or more operands were null in BinExprNode");
+		}
+		Value leftVal = left.getValue();
+		Value rightVal = right.getValue();
+		if(leftVal == null || rightVal == null) {
+			throw new Exception("Calculation Error: One or more operands were null in BinExprNode");
+		}
+		double result;
 
+		if(leftVal.getType() == ValueType.STRING || rightVal.getType() == ValueType.STRING) {
+			if(op == LexicalType.ADD) {
+				return new ValueImpl(leftVal.getSValue() + rightVal.getSValue());
+			} else {
+				throw new Exception("Calculation Error: Calculation other than ADD was attempted against a String value");
+			}
+		}
+
+		switch(op) {
+		case DIV:
+			if(rightVal.getDValue() != 0.0) {
+				result = leftVal.getDValue() / rightVal.getDValue();
+			} else {
+				throw new Exception("Calculation Error: Division by 0 was attempted");
+			}
+		case MUL:
+			result = leftVal.getDValue() * rightVal.getDValue();
+			break;
+		case SUB:
+			result = leftVal.getDValue() - rightVal.getDValue();
+		case ADD:
+			result = leftVal.getDValue() + rightVal.getDValue();
+			break;
+		default:
+			throw new Exception("Calculation Error: Invalid operator was set in BinExprNode");
+		}
+
+		if(rightVal.getType() == ValueType.DOUBLE || leftVal.getType() == ValueType.DOUBLE) {
+			return new ValueImpl(result);
+		} else {
+			return new ValueImpl((int)result);
+		}
+	}
 }

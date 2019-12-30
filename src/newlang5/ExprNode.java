@@ -184,8 +184,7 @@ public class ExprNode extends Node {
 	}
 
 	@Override
-	public Value getValue() {
-		//todo
-		return null;
+	public Value getValue() throws Exception {
+		return primedNode.getValue();
 	}
 }

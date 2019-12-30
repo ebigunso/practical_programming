@@ -128,10 +128,14 @@ public class LoopBlockNode extends Node {
 		}
 	}
 
-	private boolean judge() {
-		//todo
+	private boolean judge() throws Exception {
 		//true -> continue loop
-		return true;
+		if((cond.getValue().getBValue() == true && isUntil == false)
+				|| (cond.getValue().getBValue() == false && isUntil == true)) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	@Override
@@ -150,8 +154,18 @@ public class LoopBlockNode extends Node {
 		return out;
 	}
 
-	public Value getValue() {
-		//todo
-		return null;
+	public Value getValue() throws Exception {
+		//Option to do once regardless of condition
+		if(isDo) {
+			operation.getValue();
+		}
+
+		//Loop while condition is met
+		while(true) {
+			if(!judge()) {
+				return null;
+			}
+			operation.getValue();
+		}
 	}
 }

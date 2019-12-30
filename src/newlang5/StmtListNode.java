@@ -80,8 +80,10 @@ public class StmtListNode extends Node {
 		return strings;
 	}
 
-	public Value getValue() {
-		//todo
+	public Value getValue() throws Exception {
+		for(int i = 0; i < nodes.size(); i++) {
+			nodes.get(i).getValue();
+		}
 		return null;
 	}
 

@@ -66,9 +66,19 @@ public class ExprListNode extends Node {
 		return out;
 	}
 
-	@Override
-	public Value getValue() {
-		//todo
-		return null;
+	public Value getValue(int i) throws Exception {
+		if(i < exprList.size()) {
+			return exprList.get(i).getValue();
+		} else {
+			return null;
+		}
+	}
+
+	public List<Value> getValues() throws Exception {
+		List<Value> values = new ArrayList<Value>();
+		for(int i = 0; i < exprList.size(); i++) {
+			values.add(exprList.get(i).getValue());
+		}
+		return values;
 	}
 }

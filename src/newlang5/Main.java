@@ -13,10 +13,10 @@ public class Main {
 	        LexicalUnit		first;
 	        Environment		env;
 	        Node			prog;
-	  
+
 	        System.out.println("basic parser");
 	        try {
-	            fin = new FileInputStream("test.txt");
+	            fin = new FileInputStream(args[0]);
 	        }
 	        catch(Exception e) {
 	            System.out.println("file not found");
@@ -24,7 +24,7 @@ public class Main {
 	        }
 	        lex = new LexicalAnalyzerImpl(fin);
 	        env = new Environment(lex);
-	        
+
 	        try {
 		        first = lex.get();
 		        lex.unget(first);
@@ -39,6 +39,7 @@ public class Main {
 	        }
 	        catch(Exception e) {
 	        	System.out.println("execution error");
+	        	e.printStackTrace();
 	        }
 	}
 

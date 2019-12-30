@@ -7,7 +7,7 @@ public class ForNode extends Node {
 	Node init = null;
 	Node limit = null;
 	Node operation = null;
-	Node controlVar = null;
+	VariableNode controlVar = null;
 
 	private static final Set<LexicalType> FIRSTSET = EnumSet.of(
 			LexicalType.FOR
@@ -47,9 +47,13 @@ public class ForNode extends Node {
 			throw new Exception("Syntax Error: Missing TO in ForNode");
 		}
 
-		//Note: ConstNode dosen't run get(), and is not parsable
-		limit = ConstNode.getHandler(env.getInput().peek(), env); //May throw Exception
-		env.getInput().get();
+		if(env.getInput().expect(LexicalType.INTVAL)) {
+			//Note: ConstNode dosen't run get(), and is not parsable
+			limit = ConstNode.getHandler(env.getInput().peek(), env); //May throw Exception
+			env.getInput().get();
+		} else {
+			throw new Exception("Syntax Error: Invalid limit in ForNode");
+		}
 
 		if(env.getInput().expect(LexicalType.NL)) {
 			env.getInput().get();
@@ -73,7 +77,7 @@ public class ForNode extends Node {
 		}
 
 		//Note: VariableNode doesn't run get()
-		controlVar = VariableNode.getHandler(env.getInput().peek().getType(), env);
+		controlVar = (VariableNode)VariableNode.getHandler(env.getInput().peek().getType(), env);
 		if(controlVar == null) {
 			throw new Exception("Syntax Error: Invalid control variable after NEXT in ForNode");
 		}
@@ -96,8 +100,18 @@ public class ForNode extends Node {
 	}
 
 	@Override
-	public Value getValue() {
-		//todo
-		return null;
+	public Value getValue() throws Exception {
+		int controlVarIntVal;
+		init.getValue();
+		//Loop while controlVar <= limit
+		while(true) {
+			if(controlVar.getValue().getIValue() > limit.getValue().getIValue()) {
+				return null;
+			}
+			operation.getValue();
+			controlVarIntVal = controlVar.getValue().getIValue();
+			controlVarIntVal++;
+			controlVar.setValue(new ValueImpl(controlVarIntVal));
+		}
 	}
 }

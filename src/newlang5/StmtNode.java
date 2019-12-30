@@ -49,9 +49,4 @@ public class StmtNode extends Node {
 	public String toString() {
 		return "foo_stmt";
 	}
-
-	public Value getValue() {
-		//todo
-		return null;
-	}
 }

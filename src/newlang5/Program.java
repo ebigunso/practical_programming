@@ -56,9 +56,8 @@ public class Program extends Node {
 		return stmtList.toString();
 	}
 
-	public Value getValue() {
-		//todo
-		return null;
+	public Value getValue() throws Exception {
+		return stmtList.getValue();
 	}
 
 }

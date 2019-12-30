@@ -90,8 +90,42 @@ public class CondNode extends Node {
 	}
 
 	@Override
-	public Value getValue() {
-		//todo
-		return null;
+	public Value getValue() throws Exception {
+		if(left == null || right == null) {
+			throw new Exception("Calculation Error: One or more operands were null in CondNode");
+		}
+		Value leftVal = left.getValue();
+		Value rightVal = right.getValue();
+		if(leftVal == null || rightVal == null) {
+			throw new Exception("Calculation Error: One or more operands were null in CondNode");
+		}
+
+		if(leftVal.getType() == ValueType.STRING || rightVal.getType() == ValueType.STRING) {
+			switch(operator) {
+			case EQ:
+				return new ValueImpl(leftVal.getSValue().equals(rightVal.getSValue()));
+			case NE:
+				return new ValueImpl(!leftVal.getSValue().equals(rightVal.getSValue()));
+			default:
+				throw new Exception("Calculation Error: Invalid calculation type was attempted against a String value");
+			}
+		}
+
+		switch(operator) {
+		case EQ:
+			return new ValueImpl(leftVal.getDValue() == rightVal.getDValue());
+		case NE:
+			return new ValueImpl(leftVal.getDValue() != rightVal.getDValue());
+		case GT:
+			return new ValueImpl(leftVal.getDValue() > rightVal.getDValue());
+		case GE:
+			return new ValueImpl(leftVal.getDValue() >= rightVal.getDValue());
+		case LT:
+			return new ValueImpl(leftVal.getDValue() < rightVal.getDValue());
+		case LE:
+			return new ValueImpl(leftVal.getDValue() <= rightVal.getDValue());
+		default:
+			throw new Exception("Calculation Error: Invalid operator was set in CondNode");
+		}
 	}
 }
