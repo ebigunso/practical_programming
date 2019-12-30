@@ -11,7 +11,7 @@ public class Function {
     public Function() {
     }
 
-    public Value invoke(ExprListNode arg) {
+    public Value invoke(ExprListNode arg) throws Exception {
     	return null;
     }
 

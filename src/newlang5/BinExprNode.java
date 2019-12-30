@@ -103,6 +103,7 @@ public class BinExprNode extends Node {
 			break;
 		case SUB:
 			result = leftVal.getDValue() - rightVal.getDValue();
+			break;
 		case ADD:
 			result = leftVal.getDValue() + rightVal.getDValue();
 			break;

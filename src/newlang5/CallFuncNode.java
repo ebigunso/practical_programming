@@ -76,7 +76,7 @@ public class CallFuncNode extends Node {
 	}
 
 	@Override
-	public Value getValue() {
+	public Value getValue() throws Exception {
 		return env.getFunction(funcName).invoke(arguments);
 	}
 
