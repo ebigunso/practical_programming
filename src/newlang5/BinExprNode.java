@@ -98,6 +98,7 @@ public class BinExprNode extends Node {
 			} else {
 				throw new Exception("Calculation Error: Division by 0 was attempted");
 			}
+			break;
 		case MUL:
 			result = leftVal.getDValue() * rightVal.getDValue();
 			break;
